@@ -1,4 +1,4 @@
-FROM node:22-alpine
+FROM node:22-alpine AS build
 
 WORKDIR /app
 
@@ -7,11 +7,14 @@ RUN npm ci
 
 COPY . .
 RUN npm run build
+RUN ls -la /app/dist/client
 
-ENV NODE_ENV=production
-ENV PORT=3000
-ENV HOST=0.0.0.0
+FROM nginx:alpine
 
-EXPOSE 3000
+RUN rm -rf /usr/share/nginx/html/*
 
-CMD ["npm", "run", "start"]
+COPY --from=build /app/dist/client/ /usr/share/nginx/html/
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
