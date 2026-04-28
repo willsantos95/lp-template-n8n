@@ -1,4 +1,4 @@
-FROM node:22-alpine AS build
+FROM node:22-alpine
 
 WORKDIR /app
 
@@ -8,14 +8,6 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM nginx:alpine
+EXPOSE 3000
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-RUN rm -rf /usr/share/nginx/html/*
-
-COPY --from=build /app/dist/client/ /usr/share/nginx/html/
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["node", "dist/server/index.js"]
